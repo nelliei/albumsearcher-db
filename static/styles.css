@@ -113,7 +113,6 @@ h3 {
 
 .error {
   text-align: center;
-  background-color: rgba(224, 67, 36, 0.3);
 }
 
 /* css for the results page: */
@@ -202,7 +201,6 @@ h3 {
   margin-top: 1em;
 }
 
-
 .total-likes{
   margin-left: 2em;
 }
@@ -213,12 +211,12 @@ h3 {
 }
 
 .favorite-name {
-    color:  lightgoldenrodyellow;
-  }
+  color:  lightgoldenrodyellow;
+}
   
-  .favorite-name:hover {
-    color: rgb(238,111,87);
-  }
+.favorite-name:hover {
+  color: rgb(238,111,87);
+}
 
 
 @media only screen and (max-width: 768px) {
