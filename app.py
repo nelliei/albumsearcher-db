@@ -1,9 +1,10 @@
-from db import database
+import database
 from flask import Flask, redirect, render_template, request, url_for, session, g
 import requests
 
 app = Flask(__name__)
 app.secret_key = 'secret_zohar'
+
 engine = database.create_engine('sqlite:///music2.db', echo=False)
 database.Base.metadata.create_all(engine)
 Session = database.sessionmaker(bind=engine)
@@ -57,20 +58,22 @@ def register_page():
 
 @app.route('/register', methods=["POST"])
 def register():
-        user_name = request.form["user-name"]
-        password = request.form["psw"]
-        age = request.form["age"]
-        country = request.form["country"]
-        db_session = Session()
-        if database.get_user_by_username(db_session, user_name) is None:
-            database.add_user(db_session, user_name, password, age, country)
-            return redirect(url_for("connect_page"))
-        else:
-            return redirect(url_for("register_page", user_exist='true'))
+    user_name = request.form["user-name"]
+    password = request.form["psw"]
+    age = request.form["age"]
+    country = request.form["country"]
+    db_session = Session()
+    if database.get_user_by_username(db_session, user_name) is None:
+        database.add_user(db_session, user_name, password, age, country)
+        return redirect(url_for("connect_page"))
+    else:
+        return redirect(url_for("register_page", user_exist='true'))
 
 
 @app.route('/update', methods=["GET", 'POST'])
 def update_profile():
+    if not g.user:
+        return redirect(url_for("connect_page"))
     old_username = g.user.username
     if request.method == 'POST':
         username = request.form['user-name']
@@ -89,6 +92,8 @@ def update_profile():
 
 @app.route('/albums', methods=['GET'])
 def albums():
+    if not g.user:
+        return redirect(url_for("connect_page"))
     artist_name = request.args.get('artist').title()
     albums_resp = requests.get(f'http://theaudiodb.com/api/v1/json/1/searchalbum.php?s={artist_name}')
     albums_resp_json = albums_resp.json()
@@ -109,6 +114,8 @@ def albums():
 
 @app.route('/albums/<album_id>')
 def album(album_id):
+    if not g.user:
+        return redirect(url_for("connect_page"))
     album_info = get_album_details_api(album_id)
     if album_info is None:
         return redirect(url_for('index'))
@@ -143,6 +150,8 @@ def get_album_tracks_api(album_id):
 
 @app.route('/like', methods=['POST'])
 def like():
+    if not g.user:
+        return redirect(url_for("connect_page"))
     album_id = request.form["idalbum"]
     db_session = Session()
     database.add_like_by_ids(db_session, g.user.user_id, album_id)
@@ -158,6 +167,8 @@ def like():
 
 @app.route('/unlike', methods=['POST'])
 def unlike():
+    if not g.user:
+        return redirect(url_for("connect_page"))
     album_id = request.form["idalbum"]
     db_session = Session()
     database.delete_like(db_session, g.user.user_id, album_id)
@@ -166,6 +177,8 @@ def unlike():
 
 @app.route('/favorites', methods=['GET'])
 def favorites():
+    if not g.user:
+        return redirect(url_for("connect_page"))
     db_session = Session()
     favorites = database.get_likes_albums_by_user_id(db_session, g.user.user_id)
     return render_template('favorites.html', favorites=favorites)
