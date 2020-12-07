@@ -19,6 +19,7 @@ def before_request():
         db_session = Session()
         user = database.get_user_by_id(db_session, session['user_id'])
         g.user = user
+        db_session.close()
 
 
 @app.route('/', methods=['GET'])
@@ -28,6 +29,7 @@ def index():
         return redirect(url_for("connect_page"))
     db_session = Session()
     top_rated_albums = database.get_top_likes_albums(db_session)
+    db_session.close()
     return render_template('index.html', is_valid_artist=is_valid_artist, top_rated_albums=top_rated_albums)
 
 
@@ -47,6 +49,7 @@ def connect():
     user = database.get_user_by_username(db_session, user_name)
     if user is not None and password == user.password:
         session['user_id'] = user.user_id
+        db_session.close()
         return redirect(url_for("index"))
     else:
         return redirect(url_for("connect_page", login_failed='true'))
@@ -67,6 +70,7 @@ def register():
     db_session = Session()
     if database.get_user_by_username(db_session, user_name) is None:
         database.add_user(db_session, user_name, password, birthday, country)
+        db_session.close()
         return redirect(url_for("connect_page"))
     else:
         return redirect(url_for("register_page", user_exist='true'))
@@ -85,6 +89,7 @@ def update_profile():
         db_session = Session()
         if old_username == username or database.get_user_by_username(db_session, username) is None:
             database.update_user(db_session, g.user.user_id, username, password, birthday, country)
+            db_session.close()
             return redirect(url_for("index"))
         return redirect(url_for("update_profile", user_exist='true'))
     else:
@@ -127,6 +132,7 @@ def album(album_id):
     if database.get_like_data(db_session, g.user.user_id, album_id):
         like = 'true'
     total_likes = database.album_likes_amount(db_session, album_id)
+    db_session.close()
     return render_template(
         'album.html',
         album_info=album_info,
@@ -164,6 +170,7 @@ def like():
     image = album_info['strAlbumThumb']
     database.add_or_update_album(db_session, album_id, name, artist, year, rate, image)
     database.add_like_by_ids(db_session, g.user.user_id, album_id)
+    db_session.close()
     return redirect(url_for('album', album_id=album_id, like="true"))
 
 
@@ -183,6 +190,7 @@ def favorites():
         return redirect(url_for("connect_page"))
     db_session = Session()
     favorites = database.get_likes_albums_by_user_id(db_session, g.user.user_id)
+    db_session.close()
     return render_template('favorites.html', favorites=favorites)
 
 
