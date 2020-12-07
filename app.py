@@ -156,7 +156,6 @@ def like():
         return redirect(url_for("connect_page"))
     album_id = request.form["idalbum"]
     db_session = Session()
-    database.add_like_by_ids(db_session, g.user.user_id, album_id)
     album_info = get_album_details_api(album_id)
     name = album_info['strAlbum']
     artist = album_info['strArtist']
@@ -164,6 +163,7 @@ def like():
     rate = album_info['intScore']
     image = album_info['strAlbumThumb']
     database.add_or_update_album(db_session, album_id, name, artist, year, rate, image)
+    database.add_like_by_ids(db_session, g.user.user_id, album_id)
     return redirect(url_for('album', album_id=album_id, like="true"))
 
 
