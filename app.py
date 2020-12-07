@@ -1,11 +1,13 @@
 import database
 from flask import Flask, redirect, render_template, request, url_for, session, g
 import requests
+import os
 
 app = Flask(__name__)
 app.secret_key = 'secret_zohar'
 
-engine = database.create_engine('sqlite:///music2.db', echo=False)
+#engine = database.create_engine('sqlite:///music2.db', echo=False)
+engine = database.create_engine(os.environ['DATABASE_URL'], echo=False)
 database.Base.metadata.create_all(engine)
 Session = database.sessionmaker(bind=engine)
 
@@ -60,11 +62,11 @@ def register_page():
 def register():
     user_name = request.form["user-name"]
     password = request.form["psw"]
-    age = request.form["age"]
+    birthday = request.form["birthday"]
     country = request.form["country"]
     db_session = Session()
     if database.get_user_by_username(db_session, user_name) is None:
-        database.add_user(db_session, user_name, password, age, country)
+        database.add_user(db_session, user_name, password, birthday, country)
         return redirect(url_for("connect_page"))
     else:
         return redirect(url_for("register_page", user_exist='true'))
@@ -78,11 +80,11 @@ def update_profile():
     if request.method == 'POST':
         username = request.form['user-name']
         password = request.form['psw']
-        age = request.form['age']
+        birthday = request.form['birthday']
         country = request.form['country']
         db_session = Session()
         if old_username == username or database.get_user_by_username(db_session, username) is None:
-            database.update_user(db_session, g.user.user_id, username, password, age, country)
+            database.update_user(db_session, g.user.user_id, username, password, birthday, country)
             return redirect(url_for("index"))
         return redirect(url_for("update_profile", user_exist='true'))
     else:
