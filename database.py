@@ -13,7 +13,7 @@ class User(Base):
     user_id = Column(Integer, nullable=False, primary_key=True)
     username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    age = Column(Integer, nullable=False)
+    birthday = Column(String, nullable=False)
     country = Column(String, nullable=False)
 
 
@@ -42,17 +42,17 @@ class Like(Base):
     like_time = Column(DateTime, nullable=False)
 
 
-def add_user(session, username, password, age, country):
-    user = User(username=username, password=password, age=age, country=country)
+def add_user(session, username, password, birthday, country):
+    user = User(username=username, password=password, birthday=birthday, country=country)
     session.add(user)
     session.commit()
     return user
 
-def update_user(session, user_id, username, password, age, country):
+def update_user(session, user_id, username, password, birthday, country):
     user = get_user_by_id(session, user_id)
     user.username = username
     user.password = password
-    user.age = age
+    user.birthday = birthday
     user.country = country
     session.commit()
     return user
